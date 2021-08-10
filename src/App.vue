@@ -1,32 +1,47 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
+    <TheNav />
     <router-view/>
   </div>
 </template>
 
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator';
+import TheNav from '@/views/layouts/TheNav.vue';
+import RequestService from '@/utils/services/Request.api';
+
+@Component({
+  components: {
+    TheNav,
+  },
+})
+
+export default class Home extends Vue {
+  get organizationName() {
+    return this.$store.state.queryTerm;
+  }
+
+  async fetchOrganization() {
+    try {
+      const response = await RequestService.getOrganization(
+        this.organizationName,
+      );
+
+      if ([200, 201].includes(response.status)) {
+        this.$store.commit('SET_ORGANIZATION_DETAIL', response.data);
+      }
+
+      // TODO: Check for errors and prompt
+    } catch (e) {
+      // console.log(e);
+    }
+  }
+
+  created() {
+    this.fetchOrganization();
+  }
+}
+</script>
+
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-
-#nav {
-  padding: 30px;
-}
-
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-#nav a.router-link-exact-active {
-  color: #42b983;
-}
 </style>
